@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import { CartProvider } from './context/CartContext'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Catalog from './pages/Catalog'
@@ -10,7 +11,7 @@ import './App.css'
 
 function App() {
   return (
-    <>
+    <CartProvider>
       <Navbar />
       <main className="app-main">
         <Routes>
@@ -22,7 +23,7 @@ function App() {
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
-    </>
+    </CartProvider>
   )
 }
 

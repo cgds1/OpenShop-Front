@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useCart } from '../context/CartContext'
 
 const links = [
   { to: '/', label: 'Inicio', end: true },
@@ -9,6 +10,8 @@ const links = [
 ]
 
 function Navbar() {
+  const { cantidadItems } = useCart()
+
   return (
     <nav className="navbar">
       <span className="navbar__brand">OpenShop</span>
@@ -17,6 +20,9 @@ function Navbar() {
           <li key={to}>
             <NavLink to={to} end={end}>
               {label}
+              {to === '/cart' && cantidadItems > 0 && (
+                <span className="navbar__badge">{cantidadItems}</span>
+              )}
             </NavLink>
           </li>
         ))}
