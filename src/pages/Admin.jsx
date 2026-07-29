@@ -1,134 +1,203 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react'
+import api from '../services/api'
+import { useFetch } from '../hooks/useFetch'
+import Loader from '../components/Loader'
+import ErrorMessage from '../components/ErrorMessage'
+
+const PRODUCTO_INICIAL = {
+  nombre: '',
+  precio: '',
+  stock: '',
+  marca: '',
+  imagen_url: '',
+  categoria_id: '',
+}
 
 export default function Admin() {
-  const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [newName, setNewName] = useState('');
-  const [newPrice, setNewPrice] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [nuevoProducto, setNuevoProducto] = useState(PRODUCTO_INICIAL)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Cargar productos y órdenes reales del backend en paralelo
-        const [prodRes, ordRes] = await Promise.all([
-          fetch('http://localhost:3000/products'),
-          fetch('http://localhost:3000/orders').catch(() => ({ ok: false })) // Por si el endpoint de órdenes se arma después
-        ]);
+  const {
+    data: productos,
+    loading: loadingProductos,
+    error: errorProductos,
+    reload: reloadProductos,
+  } = useFetch(() => api.get('/products'), [])
 
-        if (prodRes.ok) setProducts(await prodRes.json());
-        if (ordRes.ok && typeof ordRes.json === 'function') {
-          const ordData = await ordRes.json();
-          setOrders(Array.isArray(ordData) ? ordData : []);
-        }
-      } catch (err) {
-        console.error('Error cargando datos del panel admin', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const {
+    data: categorias,
+  } = useFetch(() => api.get('/categories'), [])
+
+  const {
+    data: ordenes,
+    loading: loadingOrdenes,
+    error: errorOrdenes,
+    reload: reloadOrdenes,
+  } = useFetch(() => api.get('/orders'), [])
+
+  const handleChange = (e) => {
+    setNuevoProducto({ ...nuevoProducto, [e.target.name]: e.target.value })
+  }
 
   const handleAddProduct = async (e) => {
-    e.preventDefault();
-    if (!newName || !newPrice) return;
-
+    e.preventDefault()
     try {
-      const response = await fetch('http://localhost:3000/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName, price: parseFloat(newPrice) })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-
-      setProducts([...products, data]);
-      setNewName('');
-      setNewPrice('');
+      await api.post('/products', {
+        ...nuevoProducto,
+        precio: parseFloat(nuevoProducto.precio),
+        stock: parseInt(nuevoProducto.stock, 10) || 0,
+      })
+      setNuevoProducto(PRODUCTO_INICIAL)
+      reloadProductos()
     } catch (err) {
-      alert('Error al crear producto: ' + err.message);
+      alert('Error al crear producto: ' + err.message)
     }
-  };
+  }
 
   const handleDeleteProduct = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3000/products/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Error al eliminar');
-      setProducts(products.filter(p => (p.id || p._id) !== id));
+      await api.del(`/products/${id}`)
+      reloadProductos()
     } catch (err) {
-      alert(err.message);
+      alert(err.message)
     }
-  };
-
-  if (loading) return <p className="p-4">Cargando panel de administración...</p>;
+  }
 
   return (
-    <div className="max-w-6xl mx-auto p-4 space-y-10">
+    <div className="mx-auto max-w-6xl space-y-10 p-4">
       <h2 className="text-3xl font-bold">Panel de Administración</h2>
 
-      {/* Sección 1: Gestión de Productos */}
       <section>
-        <h3 className="text-xl font-semibold mb-4">Gestión de Productos</h3>
-        <form onSubmit={handleAddProduct} className="flex gap-2 mb-6">
-          <input 
-            type="text" placeholder="Nombre del producto" value={newName} 
-            onChange={(e) => setNewName(e.target.value)} className="border p-2 rounded flex-1" required 
+        <h3 className="mb-4 text-xl font-semibold">Gestión de Productos</h3>
+        <form onSubmit={handleAddProduct} className="mb-6 flex flex-wrap gap-2">
+          <input
+            type="text"
+            name="nombre"
+            placeholder="Nombre del producto"
+            value={nuevoProducto.nombre}
+            onChange={handleChange}
+            className="flex-1 rounded border p-2"
+            required
           />
-          <input 
-            type="number" placeholder="Precio" value={newPrice} 
-            onChange={(e) => setNewPrice(e.target.value)} className="border p-2 rounded w-32" required 
+          <input
+            type="number"
+            step="0.01"
+            name="precio"
+            placeholder="Precio"
+            value={nuevoProducto.precio}
+            onChange={handleChange}
+            className="w-28 rounded border p-2"
+            required
           />
-          <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-purple-700">Agregar</button>
+          <input
+            type="number"
+            name="stock"
+            placeholder="Stock"
+            value={nuevoProducto.stock}
+            onChange={handleChange}
+            className="w-24 rounded border p-2"
+            required
+          />
+          <input
+            type="text"
+            name="marca"
+            placeholder="Marca"
+            value={nuevoProducto.marca}
+            onChange={handleChange}
+            className="w-32 rounded border p-2"
+          />
+          <input
+            type="text"
+            name="imagen_url"
+            placeholder="URL de imagen"
+            value={nuevoProducto.imagen_url}
+            onChange={handleChange}
+            className="w-40 rounded border p-2"
+          />
+          <select
+            name="categoria_id"
+            value={nuevoProducto.categoria_id}
+            onChange={handleChange}
+            className="rounded border p-2"
+            required
+          >
+            <option value="">Categoría…</option>
+            {categorias?.map((cat) => (
+              <option key={cat._id} value={cat._id}>
+                {cat.nombre}
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="cursor-pointer rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
+          >
+            Agregar
+          </button>
         </form>
 
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-2 text-left">Nombre</th>
-              <th className="border p-2 text-left">Precio</th>
-              <th className="border p-2 text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(p => {
-              const id = p.id || p._id;
-              return (
-                <tr key={id}>
-                  <td className="border p-2">{p.name}</td>
-                  <td className="border p-2">${p.price}</td>
+        {loadingProductos && <Loader mensaje="Cargando productos…" />}
+        {errorProductos && (
+          <ErrorMessage message="No se pudieron cargar los productos." onRetry={reloadProductos} />
+        )}
+        {!loadingProductos && !errorProductos && (
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border p-2 text-left">Nombre</th>
+                <th className="border p-2 text-left">Precio</th>
+                <th className="border p-2 text-left">Stock</th>
+                <th className="border p-2 text-left">Categoría</th>
+                <th className="border p-2 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productos.map((p) => (
+                <tr key={p._id}>
+                  <td className="border p-2">{p.nombre}</td>
+                  <td className="border p-2">${p.precio}</td>
+                  <td className="border p-2">{p.stock}</td>
+                  <td className="border p-2">{p.categoria_id?.nombre || '—'}</td>
                   <td className="border p-2 text-center">
-                    <button onClick={() => handleDeleteProduct(id)} className="bg-red-500 text-white px-2 py-1 rounded text-sm cursor-pointer hover:bg-red-600">Eliminar</button>
+                    <button
+                      onClick={() => handleDeleteProduct(p._id)}
+                      className="cursor-pointer rounded bg-red-500 px-2 py-1 text-sm text-white hover:bg-red-600"
+                    >
+                      Eliminar
+                    </button>
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
 
-      {/* Sección 2: Tabla de Órdenes */}
       <section>
-        <h3 className="text-xl font-semibold mb-4">Órdenes de Compra Recibidas</h3>
-        {orders.length === 0 ? (
+        <h3 className="mb-4 text-xl font-semibold">Órdenes de Compra Recibidas</h3>
+        {loadingOrdenes && <Loader mensaje="Cargando órdenes…" />}
+        {errorOrdenes && (
+          <ErrorMessage message="No se pudieron cargar las órdenes." onRetry={reloadOrdenes} />
+        )}
+        {!loadingOrdenes && !errorOrdenes && ordenes.length === 0 && (
           <p className="text-gray-500">No hay órdenes registradas aún.</p>
-        ) : (
+        )}
+        {!loadingOrdenes && !errorOrdenes && ordenes.length > 0 && (
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
                 <th className="border p-2 text-left">ID Orden</th>
                 <th className="border p-2 text-left">Cliente</th>
-                <th className="border p-2 text-left">Dirección</th>
                 <th className="border p-2 text-left">Total</th>
+                <th className="border p-2 text-left">Estado</th>
               </tr>
             </thead>
             <tbody>
-              {orders.map(o => (
-                <tr key={o.id || o._id}>
-                  <td className="border p-2 font-mono text-xs">{o.id || o._id}</td>
-                  <td className="border p-2">{o.name}</td>
-                  <td className="border p-2">{o.address}</td>
+              {ordenes.map((o) => (
+                <tr key={o._id}>
+                  <td className="border p-2 font-mono text-xs">{o._id}</td>
+                  <td className="border p-2">{o.usuario_id?.nombre || '—'}</td>
                   <td className="border p-2">${o.total}</td>
+                  <td className="border p-2 capitalize">{o.estado}</td>
                 </tr>
               ))}
             </tbody>
@@ -136,5 +205,5 @@ export default function Admin() {
         )}
       </section>
     </div>
-  );
+  )
 }
