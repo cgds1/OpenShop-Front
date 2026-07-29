@@ -1,83 +1,76 @@
-import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import api from '../services/api'
+import { useFetch } from '../hooks/useFetch'
+import { useCart } from '../context/CartContext'
+import Loader from '../components/Loader'
+import ErrorMessage from '../components/ErrorMessage'
 
 export default function ProductDetail() {
-  const { id } = useParams(); // Lee el id dinámico desde la URL (/products/:id)
-  const [producto, setProducto] = useState(null);
-  const [cargando, setCargando] = useState(true);
+  const { id } = useParams()
+  const { agregar } = useCart()
+  const [agregado, setAgregado] = useState(false)
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const {
+    data: producto,
+    loading,
+    error,
+    reload,
+  } = useFetch(() => api.get(`/products/${id}`), [id])
 
-  useEffect(() => {
-    setCargando(true);
-    fetch(`${API_URL}/products/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al obtener el producto");
-        return res.json();
-      })
-      .then((data) => {
-        setProducto(data);
-        setCargando(false);
-      })
-      .catch((err) => {
-        console.error("Error en ProductDetail:", err);
-        setCargando(false);
-      });
-  }, [id, API_URL]);
+  function handleAgregar() {
+    agregar(producto)
+    setAgregado(true)
+  }
 
-  if (cargando) return <p style={{ padding: "2rem" }}>Cargando información del producto...</p>;
-  if (!producto) return <p style={{ padding: "2rem" }}>Producto no encontrado.</p>;
+  if (loading) return <Loader mensaje="Cargando información del producto…" />
+  if (error)
+    return (
+      <ErrorMessage message="No se pudo cargar el producto." onRetry={reload} />
+    )
+  if (!producto) return <p>Producto no encontrado.</p>
 
   return (
-    <section style={{ padding: "2rem", maxWidth: "850px", margin: "0 auto" }}>
-      <Link to="/catalog" style={{ textDecoration: "none", color: "#007bff", display: "inline-block", marginBottom: "1rem" }}>
+    <section className="mx-auto max-w-3xl">
+      <Link to="/catalog" className="mb-4 inline-block text-blue-600 no-underline">
         ← Volver al catálogo
       </Link>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", backgroundColor: "#fff", padding: "1.5rem", borderRadius: "8px", border: "1px solid #ddd" }}>
+      <div className="grid grid-cols-1 gap-8 rounded-lg border border-gray-200 bg-white p-6 md:grid-cols-2">
         <div>
           <img
-            src={producto.imagen_url || "https://via.placeholder.com/300"}
+            src={producto.imagen_url || 'https://via.placeholder.com/300'}
             alt={producto.nombre}
-            style={{ width: "100%", maxHeight: "320px", objectFit: "cover", borderRadius: "8px" }}
+            className="max-h-80 w-full rounded-lg object-cover"
           />
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div className="flex flex-col justify-between">
           <div>
-            <span style={{ fontSize: "0.8rem", background: "#e9ecef", padding: "4px 10px", borderRadius: "12px", textTransform: "uppercase" }}>
-              {producto.categoria_id?.nombre || "General"}
+            <span className="rounded-xl bg-gray-100 px-2.5 py-1 text-xs uppercase">
+              {producto.categoria_id?.nombre || 'General'}
             </span>
-            <h1 style={{ margin: "0.8rem 0 0.4rem", fontSize: "1.8rem" }}>{producto.nombre}</h1>
-            <p style={{ color: "#6c757d", margin: "0 0 1rem" }}>
-              Marca: <strong>{producto.marca || "N/A"}</strong>
+            <h1 className="mt-3 mb-1 text-3xl font-bold">{producto.nombre}</h1>
+            <p className="mb-4 text-gray-500">
+              Marca: <strong>{producto.marca || 'N/A'}</strong>
             </p>
-            <p style={{ fontSize: "2rem", fontWeight: "bold", color: "#28a745", margin: "0.5rem 0" }}>
-              ${producto.precio}
-            </p>
-            <p style={{ margin: "0.5rem 0" }}>
+            {producto.descripcion && (
+              <p className="mb-4 text-gray-700">{producto.descripcion}</p>
+            )}
+            <p className="my-2 text-3xl font-bold text-green-600">${producto.precio}</p>
+            <p className="my-2">
               <strong>Stock disponible:</strong> {producto.stock} unidades
             </p>
           </div>
 
           <button
-            onClick={() => alert(`¡Añadido ${producto.nombre} al carrito!`)}
-            style={{
-              background: "#28a745",
-              color: "#fff",
-              border: "none",
-              padding: "0.8rem 1.2rem",
-              borderRadius: "5px",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              cursor: "pointer",
-              marginTop: "1.5rem"
-            }}
+            onClick={handleAgregar}
+            className="mt-6 cursor-pointer rounded-md bg-green-600 px-5 py-3 font-bold text-white hover:bg-green-700"
           >
-            Agregar al carrito 🛒
+            {agregado ? 'Agregado ✓' : 'Agregar al carrito 🛒'}
           </button>
         </div>
       </div>
     </section>
-  );
+  )
 }
