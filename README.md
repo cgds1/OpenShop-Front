@@ -1,16 +1,66 @@
-# React + Vite
+# OpenShop — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Frontend de OpenShop: catálogo de productos, detalle, carrito, checkout y panel de
+administración, construido con React + Vite y conectado a la API de OpenShop-Back.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 20 LTS
+- pnpm (obligatorio; no usar npm ni yarn)
+- El backend de OpenShop corriendo en `http://localhost:3000` (ver `OpenShop-Back/README.md`)
 
-## React Compiler
+## Instalación
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+pnpm install
+```
 
-## Expanding the Oxlint configuration
+## Variables de entorno
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Copiar `.env.example` a `.env` y ajustar si hace falta:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+## Desarrollo
+
+```bash
+pnpm dev
+```
+
+La app queda disponible en `http://localhost:5173`. El backend debe permitir CORS desde este
+origen.
+
+## Build de producción
+
+```bash
+pnpm build
+pnpm preview
+```
+
+## Rutas
+
+| Ruta | Página |
+|---|---|
+| `/` | Home |
+| `/catalog` | Catálogo de productos, con filtro por categoría |
+| `/products/:id` | Detalle de producto |
+| `/cart` | Carrito de compras |
+| `/checkout` | Checkout: crea la orden en el backend |
+| `/admin` | Panel de administración: alta/baja de productos y listado de órdenes |
+
+## Estructura
+
+- `src/services/api.js` — cliente HTTP central (usa `VITE_API_URL`).
+- `src/hooks/useFetch.js` — hook de carga/error reutilizable para llamadas GET.
+- `src/context/CartContext.jsx` — estado global del carrito.
+- `src/components/` — componentes reutilizables (`ProductCard`, `CartItem`, `Loader`,
+  `ErrorMessage`, `Navbar`).
+- `src/pages/` — una página por ruta.
+
+## Lint
+
+```bash
+pnpm lint
+```
