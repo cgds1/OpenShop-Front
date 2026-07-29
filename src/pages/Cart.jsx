@@ -1,20 +1,33 @@
 import { useNavigate } from 'react-router-dom'
 import CartItem from '../components/CartItem'
 import { useCart } from '../context/CartContext'
+import { formatPrice } from '../utils/format'
 
 export default function Cart() {
   const { items, total, cambiarCantidad, quitar } = useCart()
   const navigate = useNavigate()
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <h2 className="mb-6 font-display text-3xl font-semibold text-ink">
-        Carrito de Compras
-      </h2>
+    <div className="mx-auto max-w-[900px] px-6 py-12">
+      <h1 className="mb-7 font-display text-4xl font-semibold text-ink">
+        Carrito de compras
+      </h1>
+
       {items.length === 0 ? (
-        <p className="text-muted">Tu carrito está vacío</p>
+        <div className="rounded-2xl border border-line bg-surface px-6 py-16 text-center">
+          <div className="mx-auto mb-[18px] flex h-16 w-16 items-center justify-center rounded-full bg-brand-light text-2xl">
+            🛍️
+          </div>
+          <p className="mb-5 text-[17px] text-muted">Tu carrito está vacío.</p>
+          <button
+            onClick={() => navigate('/catalog')}
+            className="cursor-pointer rounded-full bg-brand px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+          >
+            Explorar catálogo
+          </button>
+        </div>
       ) : (
-        <div className="rounded-xl border border-line bg-surface p-6">
+        <div className="rounded-2xl border border-line bg-surface px-6">
           {items.map((item) => (
             <CartItem
               key={item.producto_id}
@@ -23,13 +36,20 @@ export default function Cart() {
               onRemove={quitar}
             />
           ))}
-          <div className="mt-6 flex items-center justify-between border-t border-line pt-4">
-            <span className="text-xl font-semibold text-ink">Total: ${total}</span>
+          <div className="flex flex-wrap items-center justify-between gap-4 py-5">
+            <div>
+              <div className="text-sm text-muted">
+                Envío: <span className="font-semibold text-success">Gratis</span>
+              </div>
+              <div className="mt-0.5 font-display text-[26px] font-semibold text-ink">
+                Total: {formatPrice(total)}
+              </div>
+            </div>
             <button
               onClick={() => navigate('/checkout')}
-              className="cursor-pointer rounded-full bg-brand px-6 py-2.5 font-semibold text-white transition-colors hover:bg-brand-dark"
+              className="cursor-pointer rounded-full bg-brand px-8 py-3.5 font-semibold text-white transition-colors hover:bg-brand-dark"
             >
-              Proceder al Pago
+              Proceder al pago
             </button>
           </div>
         </div>
