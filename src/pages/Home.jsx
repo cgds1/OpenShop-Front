@@ -45,10 +45,12 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="flex aspect-[5/4] items-center justify-center rounded-2xl border border-line bg-brand-light">
-            <span className="font-mono text-sm tracking-wide text-brand-dark">
-              imagen editorial / hero
-            </span>
+          <div className="aspect-[5/4] overflow-hidden rounded-2xl border border-line bg-brand-light">
+            <img
+              src="https://picsum.photos/seed/openshop-hero/800/640"
+              alt="OpenShop"
+              className="h-full w-full object-cover"
+            />
           </div>
         </div>
       </section>
@@ -65,10 +67,12 @@ export default function Home() {
               onClick={() => navigate(`/catalog?categoria=${cat._id}`)}
               className="cursor-pointer overflow-hidden rounded-2xl border border-line bg-surface p-0 text-left"
             >
-              <div className="flex aspect-[16/7] items-center justify-center bg-brand-light">
-                <span className="font-mono text-xs text-brand-dark">
-                  categoría {cat.nombre.toLowerCase()}
-                </span>
+              <div className="aspect-[16/7] overflow-hidden bg-brand-light">
+                <img
+                  src={`https://picsum.photos/seed/categoria-${cat._id}/800/350`}
+                  alt={cat.nombre}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <div className="flex items-center justify-between px-5 py-[18px]">
                 <div>
