@@ -12,7 +12,7 @@ function App() {
   return (
     <CartProvider>
       <Navbar />
-      <main className="p-6">
+      <main className="mx-auto w-full max-w-6xl px-6 py-10">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/catalog" element={<Catalog />} />

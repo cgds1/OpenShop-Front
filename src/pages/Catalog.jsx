@@ -27,18 +27,28 @@ export default function Catalog() {
 
   return (
     <section>
-      <header className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Catálogo de Productos</h1>
+      <header className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
+        <div>
+          <span className="text-sm font-medium tracking-[0.3em] text-brand uppercase">
+            Catálogo
+          </span>
+          <h1 className="font-display text-3xl font-semibold text-ink">
+            Todos los productos
+          </h1>
+        </div>
 
         <div>
-          <label htmlFor="categoria-select" className="mr-2 font-bold">
-            Filtrar por categoría:
+          <label
+            htmlFor="categoria-select"
+            className="mr-2 text-sm font-medium text-muted"
+          >
+            Filtrar por categoría
           </label>
           <select
             id="categoria-select"
             value={categoriaSeleccionada}
             onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-            className="rounded border border-gray-300 p-2"
+            className="rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink"
           >
             <option value="">Todas las categorías</option>
             {categorias?.map((cat) => (
@@ -55,7 +65,7 @@ export default function Catalog() {
         <ErrorMessage message="No se pudieron cargar los productos." onRetry={reload} />
       )}
       {!loading && !error && productos?.length === 0 && (
-        <p>No se encontraron productos para esta categoría.</p>
+        <p className="text-muted">No se encontraron productos para esta categoría.</p>
       )}
       {!loading && !error && productos?.length > 0 && (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-6">

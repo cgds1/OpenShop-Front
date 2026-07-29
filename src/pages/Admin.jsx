@@ -13,6 +13,9 @@ const PRODUCTO_INICIAL = {
   categoria_id: '',
 }
 
+const inputClass =
+  'rounded-lg border border-line bg-surface p-2 text-sm text-ink placeholder:text-muted focus:border-brand focus:outline-none'
+
 export default function Admin() {
   const [nuevoProducto, setNuevoProducto] = useState(PRODUCTO_INICIAL)
 
@@ -23,9 +26,7 @@ export default function Admin() {
     reload: reloadProductos,
   } = useFetch(() => api.get('/products'), [])
 
-  const {
-    data: categorias,
-  } = useFetch(() => api.get('/categories'), [])
+  const { data: categorias } = useFetch(() => api.get('/categories'), [])
 
   const {
     data: ordenes,
@@ -62,20 +63,33 @@ export default function Admin() {
     }
   }
 
+  const estadoClass = {
+    pendiente: 'bg-brand-light text-brand-dark',
+    completado: 'bg-success-light text-success',
+    cancelado: 'bg-danger-light text-danger',
+  }
+
   return (
-    <div className="mx-auto max-w-6xl space-y-10 p-4">
-      <h2 className="text-3xl font-bold">Panel de Administración</h2>
+    <div className="mx-auto max-w-6xl space-y-12">
+      <h2 className="font-display text-3xl font-semibold text-ink">
+        Panel de Administración
+      </h2>
 
       <section>
-        <h3 className="mb-4 text-xl font-semibold">Gestión de Productos</h3>
-        <form onSubmit={handleAddProduct} className="mb-6 flex flex-wrap gap-2">
+        <h3 className="mb-4 font-display text-xl font-semibold text-ink">
+          Gestión de Productos
+        </h3>
+        <form
+          onSubmit={handleAddProduct}
+          className="mb-6 flex flex-wrap gap-2 rounded-xl border border-line bg-surface p-4"
+        >
           <input
             type="text"
             name="nombre"
             placeholder="Nombre del producto"
             value={nuevoProducto.nombre}
             onChange={handleChange}
-            className="flex-1 rounded border p-2"
+            className={`flex-1 ${inputClass}`}
             required
           />
           <input
@@ -85,7 +99,7 @@ export default function Admin() {
             placeholder="Precio"
             value={nuevoProducto.precio}
             onChange={handleChange}
-            className="w-28 rounded border p-2"
+            className={`w-28 ${inputClass}`}
             required
           />
           <input
@@ -94,7 +108,7 @@ export default function Admin() {
             placeholder="Stock"
             value={nuevoProducto.stock}
             onChange={handleChange}
-            className="w-24 rounded border p-2"
+            className={`w-24 ${inputClass}`}
             required
           />
           <input
@@ -103,7 +117,7 @@ export default function Admin() {
             placeholder="Marca"
             value={nuevoProducto.marca}
             onChange={handleChange}
-            className="w-32 rounded border p-2"
+            className={`w-32 ${inputClass}`}
           />
           <input
             type="text"
@@ -111,13 +125,13 @@ export default function Admin() {
             placeholder="URL de imagen"
             value={nuevoProducto.imagen_url}
             onChange={handleChange}
-            className="w-40 rounded border p-2"
+            className={`w-40 ${inputClass}`}
           />
           <select
             name="categoria_id"
             value={nuevoProducto.categoria_id}
             onChange={handleChange}
-            className="rounded border p-2"
+            className={inputClass}
             required
           >
             <option value="">Categoría…</option>
@@ -129,7 +143,7 @@ export default function Admin() {
           </select>
           <button
             type="submit"
-            className="cursor-pointer rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
+            className="cursor-pointer rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
           >
             Agregar
           </button>
@@ -137,71 +151,89 @@ export default function Admin() {
 
         {loadingProductos && <Loader mensaje="Cargando productos…" />}
         {errorProductos && (
-          <ErrorMessage message="No se pudieron cargar los productos." onRetry={reloadProductos} />
+          <ErrorMessage
+            message="No se pudieron cargar los productos."
+            onRetry={reloadProductos}
+          />
         )}
         {!loadingProductos && !errorProductos && (
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2 text-left">Nombre</th>
-                <th className="border p-2 text-left">Precio</th>
-                <th className="border p-2 text-left">Stock</th>
-                <th className="border p-2 text-left">Categoría</th>
-                <th className="border p-2 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productos.map((p) => (
-                <tr key={p._id}>
-                  <td className="border p-2">{p.nombre}</td>
-                  <td className="border p-2">${p.precio}</td>
-                  <td className="border p-2">{p.stock}</td>
-                  <td className="border p-2">{p.categoria_id?.nombre || '—'}</td>
-                  <td className="border p-2 text-center">
-                    <button
-                      onClick={() => handleDeleteProduct(p._id)}
-                      className="cursor-pointer rounded bg-red-500 px-2 py-1 text-sm text-white hover:bg-red-600"
-                    >
-                      Eliminar
-                    </button>
-                  </td>
+          <div className="overflow-hidden rounded-xl border border-line">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="bg-brand-light text-left text-brand-dark">
+                  <th className="p-3 font-semibold">Nombre</th>
+                  <th className="p-3 font-semibold">Precio</th>
+                  <th className="p-3 font-semibold">Stock</th>
+                  <th className="p-3 font-semibold">Categoría</th>
+                  <th className="p-3 text-center font-semibold">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {productos.map((p) => (
+                  <tr key={p._id} className="border-t border-line text-ink">
+                    <td className="p-3">{p.nombre}</td>
+                    <td className="p-3">${p.precio}</td>
+                    <td className="p-3">{p.stock}</td>
+                    <td className="p-3">{p.categoria_id?.nombre || '—'}</td>
+                    <td className="p-3 text-center">
+                      <button
+                        onClick={() => handleDeleteProduct(p._id)}
+                        className="cursor-pointer rounded-full bg-danger px-3 py-1 text-xs font-semibold text-white transition-colors hover:opacity-90"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
       <section>
-        <h3 className="mb-4 text-xl font-semibold">Órdenes de Compra Recibidas</h3>
+        <h3 className="mb-4 font-display text-xl font-semibold text-ink">
+          Órdenes de Compra Recibidas
+        </h3>
         {loadingOrdenes && <Loader mensaje="Cargando órdenes…" />}
         {errorOrdenes && (
-          <ErrorMessage message="No se pudieron cargar las órdenes." onRetry={reloadOrdenes} />
+          <ErrorMessage
+            message="No se pudieron cargar las órdenes."
+            onRetry={reloadOrdenes}
+          />
         )}
         {!loadingOrdenes && !errorOrdenes && ordenes.length === 0 && (
-          <p className="text-gray-500">No hay órdenes registradas aún.</p>
+          <p className="text-muted">No hay órdenes registradas aún.</p>
         )}
         {!loadingOrdenes && !errorOrdenes && ordenes.length > 0 && (
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2 text-left">ID Orden</th>
-                <th className="border p-2 text-left">Cliente</th>
-                <th className="border p-2 text-left">Total</th>
-                <th className="border p-2 text-left">Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ordenes.map((o) => (
-                <tr key={o._id}>
-                  <td className="border p-2 font-mono text-xs">{o._id}</td>
-                  <td className="border p-2">{o.usuario_id?.nombre || '—'}</td>
-                  <td className="border p-2">${o.total}</td>
-                  <td className="border p-2 capitalize">{o.estado}</td>
+          <div className="overflow-hidden rounded-xl border border-line">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="bg-brand-light text-left text-brand-dark">
+                  <th className="p-3 font-semibold">ID Orden</th>
+                  <th className="p-3 font-semibold">Cliente</th>
+                  <th className="p-3 font-semibold">Total</th>
+                  <th className="p-3 font-semibold">Estado</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {ordenes.map((o) => (
+                  <tr key={o._id} className="border-t border-line text-ink">
+                    <td className="p-3 font-mono text-xs text-muted">{o._id}</td>
+                    <td className="p-3">{o.usuario_id?.nombre || '—'}</td>
+                    <td className="p-3">${o.total}</td>
+                    <td className="p-3">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${estadoClass[o.estado] ?? 'bg-line text-muted'}`}
+                      >
+                        {o.estado}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>
