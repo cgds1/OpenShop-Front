@@ -1,5 +1,5 @@
 export default function CartItem({ item, onUpdateQuantity, onRemove }) {
-  const subtotal = item.precio_unitario * item.cantidad
+  const subtotal = Math.round(item.precio_unitario * item.cantidad * 100) / 100
 
   return (
     <div className="flex items-center justify-between border-b py-4">

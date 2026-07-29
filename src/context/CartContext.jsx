@@ -4,11 +4,18 @@ const CartContext = createContext(null)
 
 // Estructura de cada ítem alineada con orders.items[] del contrato de datos
 // (OPENSHOP_CONTEXT.md §2), para que el checkout arme el POST /orders sin remapear.
+//
+// precio_unitario se calcula con el descuento aplicado, igual que lo hace el backend al
+// crear la orden (orders.controller.js), para que el total que ve el usuario en el
+// carrito/checkout coincida con el total real que se registra en la orden.
 function toItem(producto, cantidad) {
+  const precio_unitario =
+    Math.round(producto.precio * (1 - (producto.descuento ?? 0) / 100) * 100) / 100
+
   return {
     producto_id: producto._id,
     nombre: producto.nombre,
-    precio_unitario: producto.precio,
+    precio_unitario,
     imagen_url: producto.imagen_url,
     cantidad,
   }
@@ -49,10 +56,10 @@ export function CartProvider({ children }) {
     setItems([])
   }
 
-  const total = useMemo(
-    () => items.reduce((acc, it) => acc + it.precio_unitario * it.cantidad, 0),
-    [items],
-  )
+  const total = useMemo(() => {
+    const suma = items.reduce((acc, it) => acc + it.precio_unitario * it.cantidad, 0)
+    return Math.round(suma * 100) / 100
+  }, [items])
 
   const cantidadItems = useMemo(
     () => items.reduce((acc, it) => acc + it.cantidad, 0),

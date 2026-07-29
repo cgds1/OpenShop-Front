@@ -131,7 +131,7 @@ export default function Checkout() {
             <span>
               {item.nombre} (x{item.cantidad})
             </span>
-            <span>${item.precio_unitario * item.cantidad}</span>
+            <span>${Math.round(item.precio_unitario * item.cantidad * 100) / 100}</span>
           </div>
         ))}
         <div className="mt-4 flex justify-between pt-2 text-lg font-bold">
