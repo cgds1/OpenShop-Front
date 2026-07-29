@@ -1,45 +1,31 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import CartItem from '../components/CartItem';
+import { useNavigate } from 'react-router-dom'
+import CartItem from '../components/CartItem'
+import { useCart } from '../context/CartContext'
 
 export default function Cart() {
-  const [cart, setCart] = useState([
-    { id: '1', name: 'Producto de Prueba', price: 100, quantity: 2 }
-  ]);
-  
-  const navigate = useNavigate();
-
-  const handleUpdateQuantity = (id, newQuantity) => {
-    if (newQuantity <= 0) return;
-    setCart(cart.map(item => (item.id || item._id) === id ? { ...item, quantity: newQuantity } : item));
-  };
-
-  const handleRemove = (id) => {
-    setCart(cart.filter(item => (item.id || item._id) !== id));
-  };
-
-  const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const { items, total, cambiarCantidad, quitar } = useCart()
+  const navigate = useNavigate()
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Carrito de Compras</h2>
-      {cart.length === 0 ? (
+    <div className="mx-auto max-w-2xl p-4">
+      <h2 className="mb-4 text-2xl font-bold">Carrito de Compras</h2>
+      {items.length === 0 ? (
         <p className="text-gray-500">Tu carrito está vacío</p>
       ) : (
         <>
-          {cart.map(item => (
-            <CartItem 
-              key={item.id || item._id} 
-              item={item} 
-              onUpdateQuantity={handleUpdateQuantity} 
-              onRemove={handleRemove} 
+          {items.map((item) => (
+            <CartItem
+              key={item.producto_id}
+              item={item}
+              onUpdateQuantity={cambiarCantidad}
+              onRemove={quitar}
             />
           ))}
-          <div className="mt-6 flex justify-between items-center border-t pt-4">
+          <div className="mt-6 flex items-center justify-between border-t pt-4">
             <span className="text-xl font-bold">Total: ${total}</span>
-            <button 
+            <button
               onClick={() => navigate('/checkout')}
-              className="bg-blue-600 text-white px-5 py-2 rounded font-semibold cursor-pointer hover:bg-blue-700"
+              className="cursor-pointer rounded bg-blue-600 px-5 py-2 font-semibold text-white hover:bg-blue-700"
             >
               Proceder al Pago
             </button>
@@ -47,5 +33,5 @@ export default function Cart() {
         </>
       )}
     </div>
-  );
+  )
 }

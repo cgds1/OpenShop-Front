@@ -1,27 +1,34 @@
 export default function CartItem({ item, onUpdateQuantity, onRemove }) {
-  const itemId = item.id || item._id;
+  const subtotal = item.precio_unitario * item.cantidad
 
   return (
     <div className="flex items-center justify-between border-b py-4">
       <div>
-        <h4 className="font-semibold">{item.name}</h4>
-        <p className="text-gray-500">${item.price} c/u</p>
+        <h4 className="font-semibold">{item.nombre}</h4>
+        <p className="text-gray-500">${item.precio_unitario} c/u</p>
       </div>
       <div className="flex items-center gap-2">
-        <button 
-          onClick={() => onUpdateQuantity(itemId, item.quantity - 1)}
-          className="px-2.5 py-1 bg-gray-200 rounded cursor-pointer font-bold"
-        >-</button>
-        <span className="px-2">{item.quantity}</span>
-        <button 
-          onClick={() => onUpdateQuantity(itemId, item.quantity + 1)}
-          className="px-2.5 py-1 bg-gray-200 rounded cursor-pointer font-bold"
-        >+</button>
-        <button 
-          onClick={() => onRemove(itemId)}
-          className="text-red-500 ml-4 cursor-pointer text-sm font-semibold hover:underline"
-        >Eliminar</button>
+        <button
+          onClick={() => onUpdateQuantity(item.producto_id, item.cantidad - 1)}
+          className="cursor-pointer rounded bg-gray-200 px-2.5 py-1 font-bold"
+        >
+          -
+        </button>
+        <span className="px-2">{item.cantidad}</span>
+        <button
+          onClick={() => onUpdateQuantity(item.producto_id, item.cantidad + 1)}
+          className="cursor-pointer rounded bg-gray-200 px-2.5 py-1 font-bold"
+        >
+          +
+        </button>
+        <span className="ml-4 w-20 text-right font-semibold">${subtotal}</span>
+        <button
+          onClick={() => onRemove(item.producto_id)}
+          className="ml-4 cursor-pointer text-sm font-semibold text-red-500 hover:underline"
+        >
+          Eliminar
+        </button>
       </div>
     </div>
-  );
+  )
 }
