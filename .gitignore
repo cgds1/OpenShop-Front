@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# pnpm es obligatorio en este proyecto
+package-lock.json
+
 # Environment (nunca subir el .env real; solo .env.example)
 .env
 .env.*

@@ -12,12 +12,12 @@ async function request(path, { method = 'GET', body } = {}) {
 
   const res = await fetch(`${BASE_URL}${path}`, options)
 
-  // Manejo de error centralizado: intentamos leer el message del back si viene.
+  // Manejo de error centralizado: intentamos leer el mensaje del back si viene.
   if (!res.ok) {
     let detalle = ''
     try {
       const data = await res.json()
-      detalle = data?.message ?? ''
+      detalle = data?.error ?? data?.message ?? ''
     } catch {
       // respuesta sin cuerpo JSON: nos quedamos con el status
     }

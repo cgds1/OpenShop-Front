@@ -7,13 +7,12 @@ import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import Admin from './pages/Admin'
-import './App.css'
 
 function App() {
   return (
     <CartProvider>
       <Navbar />
-      <main className="app-main">
+      <main className="p-6">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/catalog" element={<Catalog />} />
